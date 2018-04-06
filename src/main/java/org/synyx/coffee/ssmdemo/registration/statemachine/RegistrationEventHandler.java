@@ -8,7 +8,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.scheduling.annotation.Async;
 
 import org.springframework.statemachine.StateMachine;
-import org.springframework.statemachine.config.StateMachineBuilder;
+import org.springframework.statemachine.service.StateMachineService;
 
 import org.springframework.stereotype.Component;
 
@@ -22,12 +22,11 @@ import org.synyx.coffee.ssmdemo.registration.events.RegistrationCreatedEvent;
 public class RegistrationEventHandler {
 
     private static final String STATE_MACHINE_ID_PREFIX = "registration_%s";
-    private final StateMachineBuilder.Builder<RegistrationStates, RegistrationEvents> stateMachineBuilder;
+    private final StateMachineService<RegistrationStates, RegistrationEvents> stateMachineService;
 
-    public RegistrationEventHandler(
-        StateMachineBuilder.Builder<RegistrationStates, RegistrationEvents> stateMachineBuilder) {
+    public RegistrationEventHandler(StateMachineService<RegistrationStates, RegistrationEvents> stateMachineService) {
 
-        this.stateMachineBuilder = stateMachineBuilder;
+        this.stateMachineService = stateMachineService;
     }
 
     @Async
@@ -62,24 +61,9 @@ public class RegistrationEventHandler {
 
     private void sendEventToStateMachine(RegistrationEvents event, String token, boolean startMachine) {
 
-        configureMachineIdOnBuilder(createMachineIdFromToken(token));
-
-        StateMachine<RegistrationStates, RegistrationEvents> registrationStateMachine = stateMachineBuilder.build();
-
-        if (startMachine) {
-            registrationStateMachine.start();
-        }
+        StateMachine<RegistrationStates, RegistrationEvents> registrationStateMachine =
+            stateMachineService.acquireStateMachine(createMachineIdFromToken(token), startMachine);
 
         registrationStateMachine.sendEvent(createEventMessage(event, token));
-    }
-
-
-    private void configureMachineIdOnBuilder(String machineId) {
-
-        try {
-            stateMachineBuilder.configureConfiguration().withConfiguration().machineId(machineId);
-        } catch (Exception e) {
-            throw new RuntimeException("failed to configure machineId for confirmationDeliveryStateMachine");
-        }
     }
 }

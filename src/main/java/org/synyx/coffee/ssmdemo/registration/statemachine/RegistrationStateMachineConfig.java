@@ -1,13 +1,14 @@
 package org.synyx.coffee.ssmdemo.registration.statemachine;
 
-import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.context.annotation.Configuration;
 
-import org.springframework.statemachine.config.StateMachineBuilder;
-import org.springframework.statemachine.data.jpa.JpaPersistingStateMachineInterceptor;
-import org.springframework.statemachine.data.jpa.JpaStateMachineRepository;
-import org.springframework.statemachine.persist.DefaultStateMachinePersister;
-import org.springframework.statemachine.persist.StateMachinePersister;
+import org.springframework.statemachine.config.EnableStateMachineFactory;
+import org.springframework.statemachine.config.EnumStateMachineConfigurerAdapter;
+import org.springframework.statemachine.config.builders.StateMachineConfigurationConfigurer;
+import org.springframework.statemachine.config.builders.StateMachineStateConfigurer;
+import org.springframework.statemachine.config.builders.StateMachineTransitionConfigurer;
 import org.springframework.statemachine.persist.StateMachineRuntimePersister;
 
 import org.synyx.coffee.ssmdemo.Loggable;
@@ -24,46 +25,30 @@ import java.util.EnumSet;
  * @author  jayasinghe@synyx.de
  */
 @Configuration
-public class RegistrationStateMachineConfig implements Loggable {
+@EnableStateMachineFactory
+public class RegistrationStateMachineConfig
+    extends EnumStateMachineConfigurerAdapter<RegistrationStates, RegistrationEvents> implements Loggable {
 
-    @Bean
-    public StateMachinePersister<RegistrationStates, RegistrationEvents, String> stateMachinePersister(
-        StateMachineRuntimePersister<RegistrationStates, RegistrationEvents, String> stateMachineRuntimePersister) {
+    @Autowired
+    private StateMachineRuntimePersister<RegistrationStates, RegistrationEvents, String> stateMachineRuntimePersister;
 
-        return new DefaultStateMachinePersister<>(stateMachineRuntimePersister);
+    @Override
+    public void configure(StateMachineStateConfigurer<RegistrationStates, RegistrationEvents> states)
+        throws Exception {
+
+        states.withStates().initial(RegistrationStates.INITIAL).states(EnumSet.allOf(RegistrationStates.class));
     }
 
 
-    @Bean
-    public StateMachineRuntimePersister<RegistrationStates, RegistrationEvents, String> stateMachineRuntimePersister(
-        JpaStateMachineRepository jpaStateMachineRepository) {
+    @Override
+    public void configure(StateMachineTransitionConfigurer<RegistrationStates, RegistrationEvents> transitions)
+        throws Exception {
 
-        return new JpaPersistingStateMachineInterceptor<>(jpaStateMachineRepository);
-    }
-
-
-    @Bean
-    public StateMachineBuilder.Builder<RegistrationStates, RegistrationEvents> registrationStateMachineBuilder(
-        StateMachineRuntimePersister<RegistrationStates, RegistrationEvents, String> stateMachineRuntimePersister,
-        AcceptedAction acceptedAction, RejectedAction rejectedAction, CreatedAction createdAction) throws Exception {
-
-        StateMachineBuilder.Builder<RegistrationStates, RegistrationEvents> builder = StateMachineBuilder
-                .<RegistrationStates, RegistrationEvents>builder();
-
-        builder.configureConfiguration().withConfiguration().autoStartup(true);
-        builder.configureConfiguration().withPersistence().runtimePersister(stateMachineRuntimePersister);
-
-        builder.configureStates()
-            .withStates()
-            .initial(RegistrationStates.INITIAL)
-            .states(EnumSet.allOf(RegistrationStates.class));
-
-        builder.configureTransitions()
-            .withExternal()
+        transitions.withExternal()
             .source(RegistrationStates.INITIAL)
             .target(RegistrationStates.NEW)
             .event(RegistrationEvents.CREATE)
-            .action(createdAction)
+            .action(new CreatedAction())
             .and()
             .withExternal()
             .source(RegistrationStates.INITIAL)
@@ -79,25 +64,25 @@ public class RegistrationStateMachineConfig implements Loggable {
             .source(RegistrationStates.NEW)
             .target(RegistrationStates.ACCEPTED)
             .event(RegistrationEvents.ACCEPT)
-            .action(acceptedAction)
+            .action(new AcceptedAction())
             .and()
             .withExternal()
             .source(RegistrationStates.NEW)
             .target(RegistrationStates.REJECTED)
             .event(RegistrationEvents.REJECT)
-            .action(rejectedAction)
+            .action(new RejectedAction())
             .and()
             .withExternal()
             .source(RegistrationStates.PRE_ACCEPTED)
             .target(RegistrationStates.ACCEPTED)
             .event(RegistrationEvents.CREATE)
-            .action(acceptedAction)
+            .action(new AcceptedAction())
             .and()
             .withExternal()
             .source(RegistrationStates.PRE_REJECTED)
             .target(RegistrationStates.REJECTED)
             .event(RegistrationEvents.CREATE)
-            .action(rejectedAction)
+            .action(new RejectedAction())
             .and()
             .withExternal()
             .source(RegistrationStates.NEW)
@@ -113,7 +98,15 @@ public class RegistrationStateMachineConfig implements Loggable {
             .source(RegistrationStates.REJECTED)
             .target(RegistrationStates.TERMINAL)
             .event(RegistrationEvents.REJECT_TIMEOUT);
+    }
 
-        return builder;
+
+    @Override
+    public void configure(StateMachineConfigurationConfigurer<RegistrationStates, RegistrationEvents> config)
+        throws Exception {
+
+        super.configure(config);
+        config.withConfiguration().autoStartup(true);
+        config.withPersistence().runtimePersister(stateMachineRuntimePersister);
     }
 }
