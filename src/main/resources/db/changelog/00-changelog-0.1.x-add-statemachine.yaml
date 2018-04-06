@@ -1,0 +1,26 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-state-machine
+      author: jayasinghe
+      changes:
+        ## runtime table for spring statemachine
+        - createTable:
+            tableName: state_machine
+            columns:
+              - column:
+                  name: machine_id
+                  type: VARCHAR(255)
+                  constraints:
+                    primaryKey: true
+                    unique: true
+                    nullable: false
+              - column:
+                  name: state
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: state_machine_context
+                  type: BLOB
+                  constraints:
+                    nullable: true

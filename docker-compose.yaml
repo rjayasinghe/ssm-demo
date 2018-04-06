@@ -1,0 +1,15 @@
+version: '2'
+services:
+  'mariadb':
+    image: mariadb
+    ports:
+        - "3306:3306"
+    environment:
+        ## Development only!
+        - MYSQL_ALLOW_EMPTY_PASSWORD=true
+        - MYSQL_DATABASE=service_registration
+  'rabbitmq':
+    image: rabbitmq:3-management
+    ports:
+        - "5672:5672"
+        - "15672:15672"

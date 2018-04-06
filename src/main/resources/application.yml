@@ -1,0 +1,39 @@
+##
+## The default configuration properties
+#---
+spring:
+  profiles:
+    active: dev
+    encoding: UTF-8
+  rabbitmq:
+    publisher-confirms: true
+
+## ----------------------------------------------------------------------------
+## Scheduling defaults (in the code) here only as a reference.
+#sms.confirm.delay: 11000
+#sms.reject.delay: 55000
+## ----------------------------------------------------------------------------
+
+##
+## Development profile provides a runnable local configuration that does not
+## depend on any external assets, just mocks or dummy components and services.
+---
+spring:
+  profiles: dev
+cola:
+  environment: dev
+##
+## The local development profile, uses Docker and the assets declared in the
+## `docker-compose.yml` file to closer mimic the target environment. Either
+## manually run `docker-compose up -d` or check out the `Makefile` to start.
+---
+spring:
+  profiles: local
+  rabbitmq:
+    username: guest
+    password: guest
+  datasource:
+    url: jdbc:mysql://localhost:3306/service_registration?useUnicode=yes&characterEncoding=utf8
+    username: root
+    init-sql: "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
