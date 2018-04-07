@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: registration
+      author: jayasinghe
+      changes:
+        ## runtime table for spring statemachine
+        - createTable:
+            tableName: registration
+            columns:
+              - column:
+                  name: token
+                  type: VARCHAR(255)
+                  constraints:
+                    primaryKey: true
+                    unique: true
+                    nullable: false

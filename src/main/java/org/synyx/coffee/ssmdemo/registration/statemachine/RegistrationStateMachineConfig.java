@@ -1,7 +1,5 @@
 package org.synyx.coffee.ssmdemo.registration.statemachine;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.context.annotation.Configuration;
 
 import org.springframework.statemachine.config.EnableStateMachineFactory;
@@ -29,8 +27,16 @@ import java.util.EnumSet;
 public class RegistrationStateMachineConfig
     extends EnumStateMachineConfigurerAdapter<RegistrationStates, RegistrationEvents> implements Loggable {
 
-    @Autowired
-    private StateMachineRuntimePersister<RegistrationStates, RegistrationEvents, String> stateMachineRuntimePersister;
+    private final StateMachineRuntimePersister<RegistrationStates, RegistrationEvents, String> stateMachineRuntimePersister;
+    private final CreatedAction createdAction;
+
+    public RegistrationStateMachineConfig(
+        StateMachineRuntimePersister<RegistrationStates, RegistrationEvents, String> stateMachineRuntimePersister,
+        CreatedAction createdAction) {
+
+        this.stateMachineRuntimePersister = stateMachineRuntimePersister;
+        this.createdAction = createdAction;
+    }
 
     @Override
     public void configure(StateMachineStateConfigurer<RegistrationStates, RegistrationEvents> states)
@@ -48,7 +54,7 @@ public class RegistrationStateMachineConfig
             .source(RegistrationStates.INITIAL)
             .target(RegistrationStates.NEW)
             .event(RegistrationEvents.CREATE)
-            .action(new CreatedAction())
+            .action(createdAction)
             .and()
             .withExternal()
             .source(RegistrationStates.INITIAL)
