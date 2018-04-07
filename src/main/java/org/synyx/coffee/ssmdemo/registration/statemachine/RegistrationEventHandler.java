@@ -16,9 +16,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.synyx.coffee.ssmdemo.Loggable;
+import org.synyx.coffee.ssmdemo.registration.Registration;
+import org.synyx.coffee.ssmdemo.registration.RegistrationRepository;
 import org.synyx.coffee.ssmdemo.registration.events.RegistrationAcceptedEvent;
 import org.synyx.coffee.ssmdemo.registration.events.RegistrationCreatedEvent;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,10 +32,13 @@ public class RegistrationEventHandler implements Loggable {
     private static final String STATE_MACHINE_ID_PREFIX = "registration_%s";
     private Map<String, String> machineIds = new ConcurrentHashMap<>();
     private final StateMachineService<RegistrationStates, RegistrationEvents> stateMachineService;
+    private final RegistrationRepository registrationRepository;
 
-    public RegistrationEventHandler(StateMachineService<RegistrationStates, RegistrationEvents> stateMachineService) {
+    public RegistrationEventHandler(StateMachineService<RegistrationStates, RegistrationEvents> stateMachineService,
+        RegistrationRepository registrationRepository) {
 
         this.stateMachineService = stateMachineService;
+        this.registrationRepository = registrationRepository;
     }
 
     @Async
@@ -82,20 +88,19 @@ public class RegistrationEventHandler implements Loggable {
     }
 
 
-    @Scheduled(fixedDelay = 1000L)
+    @Scheduled(fixedDelay = 2000L)
     @Transactional
     public void terminateFinishedRegistrations() {
 
-        machineIds.keySet().forEach(machineId -> {
-            logger().info("found finished registration. will trigger cleanup.");
+        List<Registration> registrations = registrationRepository.findAll();
+
+        registrations.forEach(registration -> {
+            final String token = registration.getToken();
+            final String machineId = createMachineIdFromToken(token);
 
             StateMachine<RegistrationStates, RegistrationEvents> registrationStateMachine =
                 stateMachineService.acquireStateMachine(machineId);
-
-            if (registrationStateMachine.getState().equals(RegistrationStates.ACCEPTED))
-                registrationStateMachine.sendEvent(RegistrationEvents.ACCEPT_TIMEOUT);
-            else if (registrationStateMachine.getState().equals(RegistrationStates.REJECTED))
-                registrationStateMachine.sendEvent(RegistrationEvents.REJECT_TIMEOUT);
+            registrationStateMachine.sendEvent(createEventMessage(RegistrationEvents.TERMINATION_TIMEOUT, token));
         });
     }
 }

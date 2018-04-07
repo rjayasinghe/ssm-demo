@@ -13,6 +13,7 @@ import org.synyx.coffee.ssmdemo.Loggable;
 import org.synyx.coffee.ssmdemo.registration.statemachine.actions.AcceptedAction;
 import org.synyx.coffee.ssmdemo.registration.statemachine.actions.CreatedAction;
 import org.synyx.coffee.ssmdemo.registration.statemachine.actions.RejectedAction;
+import org.synyx.coffee.ssmdemo.registration.statemachine.actions.TerminatedAction;
 
 import java.util.EnumSet;
 
@@ -29,13 +30,15 @@ public class RegistrationStateMachineConfig
 
     private final StateMachineRuntimePersister<RegistrationStates, RegistrationEvents, String> stateMachineRuntimePersister;
     private final CreatedAction createdAction;
+    private final TerminatedAction terminatedAction;
 
     public RegistrationStateMachineConfig(
         StateMachineRuntimePersister<RegistrationStates, RegistrationEvents, String> stateMachineRuntimePersister,
-        CreatedAction createdAction) {
+        CreatedAction createdAction, TerminatedAction terminatedAction) {
 
         this.stateMachineRuntimePersister = stateMachineRuntimePersister;
         this.createdAction = createdAction;
+        this.terminatedAction = terminatedAction;
     }
 
     @Override
@@ -98,12 +101,14 @@ public class RegistrationStateMachineConfig
             .withExternal()
             .source(RegistrationStates.ACCEPTED)
             .target(RegistrationStates.TERMINAL)
-            .event(RegistrationEvents.ACCEPT_TIMEOUT)
+            .event(RegistrationEvents.TERMINATION_TIMEOUT)
+            .action(terminatedAction)
             .and()
             .withExternal()
             .source(RegistrationStates.REJECTED)
             .target(RegistrationStates.TERMINAL)
-            .event(RegistrationEvents.REJECT_TIMEOUT);
+            .event(RegistrationEvents.TERMINATION_TIMEOUT)
+            .action(terminatedAction);
     }
 
 

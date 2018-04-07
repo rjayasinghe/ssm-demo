@@ -6,6 +6,5 @@ public enum RegistrationEvents {
     REJECT,
     ACCEPT,
     CONFIRM,
-    REJECT_TIMEOUT,
-    ACCEPT_TIMEOUT,
+    TERMINATION_TIMEOUT,
 }
