@@ -12,3 +12,5 @@ databaseChangeLog:
     - file: db/changelog/00-changelog-0.1.x-add-statemachine.yaml
   - include:
     - file: db/changelog/01-changelog-0.1.x-add-registration.yaml
+  - include:
+    - file: db/changelog/02-changelog-0.1.x-add-notification.yaml

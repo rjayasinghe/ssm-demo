@@ -1,11 +1,11 @@
 databaseChangeLog:
   - changeSet:
-      id: registration
+      id: notification
       author: jayasinghe
       changes:
-        ## persistence for registration data
+        ## persistence for confirmation data
         - createTable:
-            tableName: registration
+            tableName: notification
             columns:
               - column:
                   name: token

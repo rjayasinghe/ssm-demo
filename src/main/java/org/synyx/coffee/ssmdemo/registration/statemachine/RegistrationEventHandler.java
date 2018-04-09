@@ -6,7 +6,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.service.StateMachineService;
@@ -88,7 +87,7 @@ public class RegistrationEventHandler implements Loggable {
     }
 
 
-    @Scheduled(fixedDelay = 2000L)
+//    @Scheduled(fixedDelay = 2000L)
     @Transactional
     public void terminateFinishedRegistrations() {
 
