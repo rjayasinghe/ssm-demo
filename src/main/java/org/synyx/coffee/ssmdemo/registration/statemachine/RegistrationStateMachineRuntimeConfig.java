@@ -14,7 +14,7 @@ import org.springframework.statemachine.service.StateMachineService;
 
 
 @Configuration
-public class RegistrationStateMachinePersistenceConfig {
+public class RegistrationStateMachineRuntimeConfig {
 
     @Bean
     public StateMachinePersister<RegistrationStates, RegistrationEvents, String> stateMachinePersister(
@@ -26,9 +26,10 @@ public class RegistrationStateMachinePersistenceConfig {
 
     @Bean
     public StateMachineService<RegistrationStates, RegistrationEvents> stateMachineService(
-        StateMachineFactory<RegistrationStates, RegistrationEvents> stateMachineFactory) {
+        StateMachineFactory<RegistrationStates, RegistrationEvents> stateMachineFactory,
+        StateMachineRuntimePersister<RegistrationStates, RegistrationEvents, String> stateMachineRuntimePersister) {
 
-        return new DefaultStateMachineService<>(stateMachineFactory);
+        return new DefaultStateMachineService<>(stateMachineFactory, stateMachineRuntimePersister);
     }
 
 

@@ -80,9 +80,9 @@ public class RegistrationEventHandler implements Loggable {
 
     private void sendEventToStateMachine(RegistrationEvents event, String token, boolean startMachine) {
 
+        final String machineId = createMachineIdFromToken(token);
         StateMachine<RegistrationStates, RegistrationEvents> registrationStateMachine =
-            stateMachineService.acquireStateMachine(createMachineIdFromToken(token), startMachine);
-
+            stateMachineService.acquireStateMachine(machineId);
         registrationStateMachine.sendEvent(createEventMessage(event, token));
     }
 

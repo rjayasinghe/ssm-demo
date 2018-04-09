@@ -79,9 +79,9 @@ public class ConfirmationHandler implements Loggable {
     @Scheduled(fixedDelay = 5000L)
     public void reschedulePotentiallyFailedNotifications() {
 
-        logger().info("checking for open notifications and notify their statemachines to retry send");
         notificationRepository.findAll().forEach(notification -> {
-            sendEventToStateMachine(AmqpSendEvents.SEND, notification.getToken(), false);
+            logger().info("will re-try send for notification {}", notification.getToken());
+            sendEventToStateMachine(AmqpSendEvents.RE_SEND, notification.getToken(), false);
         });
     }
 
@@ -89,7 +89,7 @@ public class ConfirmationHandler implements Loggable {
     private void sendEventToStateMachine(AmqpSendEvents event, String token, boolean startMachine) {
 
         StateMachine<AmqpSendStates, AmqpSendEvents> amqpSendStateMachine =
-            amqpSendStateMachineService.acquireStateMachine(createMachineIdFromToken(token), startMachine);
+            amqpSendStateMachineService.acquireStateMachine(createMachineIdFromToken(token));
 
         amqpSendStateMachine.sendEvent(createEventMessage(event, token));
     }

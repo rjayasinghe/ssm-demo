@@ -69,7 +69,7 @@ public class AmqpSendStateMachineConfig extends EnumStateMachineConfigurerAdapte
             .withExternal()
             .source(AmqpSendStates.NEW)
             .target(AmqpSendStates.PREPARED)
-            .event(AmqpSendEvents.SEND)
+            .event(AmqpSendEvents.RE_SEND)
             .action(sendAction, loggingErrorAction)
             .and()
             .withExternal()
@@ -110,7 +110,6 @@ public class AmqpSendStateMachineConfig extends EnumStateMachineConfigurerAdapte
         throws Exception {
 
         super.configure(config);
-        config.withConfiguration().autoStartup(true);
         config.withPersistence().runtimePersister(stateMachineRuntimePersister);
     }
 }

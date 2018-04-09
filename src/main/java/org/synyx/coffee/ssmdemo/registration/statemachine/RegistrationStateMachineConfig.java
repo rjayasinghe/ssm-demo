@@ -119,7 +119,11 @@ public class RegistrationStateMachineConfig
         throws Exception {
 
         super.configure(config);
-        config.withConfiguration().autoStartup(true);
+
+        /*
+         * NEVER, EVER set autoStartup to 'true' when working with JPA persistence of state machines
+         */
+        config.withConfiguration().autoStartup(false);
         config.withPersistence().runtimePersister(stateMachineRuntimePersister);
     }
 }

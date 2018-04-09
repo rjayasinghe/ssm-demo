@@ -14,7 +14,7 @@ import org.springframework.statemachine.service.StateMachineService;
 
 
 @Configuration
-public class AmqpSendStateMachinePersistenceConfig {
+public class AmqpSendStateMachineRuntimeConfig {
 
     @Bean
     public StateMachinePersister<AmqpSendStates, AmqpSendEvents, String> amqpSendStateMachinePersister(
@@ -26,9 +26,10 @@ public class AmqpSendStateMachinePersistenceConfig {
 
     @Bean
     public StateMachineService<AmqpSendStates, AmqpSendEvents> amqpSendStateMachineService(
-        StateMachineFactory<AmqpSendStates, AmqpSendEvents> amqpSendStateMachineFactory) {
+        StateMachineFactory<AmqpSendStates, AmqpSendEvents> amqpSendStateMachineFactory,
+        StateMachineRuntimePersister<AmqpSendStates, AmqpSendEvents, String> amqpSendStateMachineRuntimePersister) {
 
-        return new DefaultStateMachineService<>(amqpSendStateMachineFactory);
+        return new DefaultStateMachineService<>(amqpSendStateMachineFactory, amqpSendStateMachineRuntimePersister);
     }
 
 
