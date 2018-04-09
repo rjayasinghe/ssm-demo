@@ -48,7 +48,7 @@ public class ConfirmationHandler implements Loggable {
 
         final String machineId = createMachineIdFromToken(confirmationCreateEvent.getToken());
 
-        sendEventToStateMachine(AmqpSendEvents.SEND, confirmationCreateEvent.getToken(), true);
+        sendEventToStateMachine(AmqpSendEvents.START, confirmationCreateEvent.getToken(), true);
     }
 
 

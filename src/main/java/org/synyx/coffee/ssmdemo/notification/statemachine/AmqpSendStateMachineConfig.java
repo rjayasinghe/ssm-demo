@@ -52,7 +52,7 @@ public class AmqpSendStateMachineConfig extends EnumStateMachineConfigurerAdapte
         states.withStates()
             .initial(AmqpSendStates.INITIAL)
             .states(EnumSet.allOf(AmqpSendStates.class))
-            .end(AmqpSendStates.ROUTED);
+            .end(AmqpSendStates.PUBLISH_CONFIRMED);
     }
 
 
@@ -62,29 +62,33 @@ public class AmqpSendStateMachineConfig extends EnumStateMachineConfigurerAdapte
 
         transitions.withExternal()
             .source(AmqpSendStates.INITIAL)
+            .target(AmqpSendStates.NEW)
+            .event(AmqpSendEvents.START)
+            .action(notificationPersistAction, loggingErrorAction)
+            .and()
+            .withExternal()
+            .source(AmqpSendStates.NEW)
             .target(AmqpSendStates.PREPARED)
             .event(AmqpSendEvents.SEND)
             .action(sendAction, loggingErrorAction)
-            .action(notificationPersistAction)
             .and()
             .withExternal()
+            .source(AmqpSendStates.NEW)
             .source(AmqpSendStates.PREPARED)
-            .target(AmqpSendStates.ROUTED)
+            .target(AmqpSendStates.RELAYED)
             .event(AmqpSendEvents.PUBLISH_CONFIRMED)
             .action(routedAction, loggingErrorAction)
             .and()
             .withExternal()
-            .source(AmqpSendStates.INITIAL)
-            .target(AmqpSendStates.ROUTED)
-            .event(AmqpSendEvents.PUBLISH_CONFIRMED)
-            .action(routedAction, loggingErrorAction)
-            .and()
-            .withExternal()
+            .source(AmqpSendStates.NEW)
+            .source(AmqpSendStates.RELAYED)
             .source(AmqpSendStates.PREPARED)
             .target(AmqpSendStates.FAILED)
             .event(AmqpSendEvents.NOT_PUBLISHED)
             .and()
             .withExternal()
+            .source(AmqpSendStates.NEW)
+            .source(AmqpSendStates.RELAYED)
             .source(AmqpSendStates.PREPARED)
             .target(AmqpSendStates.FAILED)
             .event(AmqpSendEvents.NOT_ROUTED)
@@ -96,7 +100,7 @@ public class AmqpSendStateMachineConfig extends EnumStateMachineConfigurerAdapte
             .and()
             .withExternal()
             .source(AmqpSendStates.FAILED)
-            .target(AmqpSendStates.INITIAL)
+            .target(AmqpSendStates.NEW)
             .timer(2000L);
     }
 

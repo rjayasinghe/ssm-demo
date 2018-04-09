@@ -3,7 +3,9 @@ package org.synyx.coffee.ssmdemo.notification.statemachine;
 public enum AmqpSendStates {
 
     INITIAL,
-    ROUTED,
+    PUBLISH_CONFIRMED,
     PREPARED,
+    NEW,
+    RELAYED,
     FAILED
 }

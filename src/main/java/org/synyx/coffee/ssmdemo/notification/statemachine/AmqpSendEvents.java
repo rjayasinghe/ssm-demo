@@ -6,5 +6,6 @@ public enum AmqpSendEvents {
     NOT_PUBLISHED,
     NOT_ROUTED,
     SEND,
+    START,
     TIMEOUT
 }
